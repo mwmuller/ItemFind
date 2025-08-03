@@ -1,10 +1,9 @@
 package net.runelite.client.plugins.itemfind;
 import net.runelite.client.ui.components.IconTextField;
 
-
-
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.ColorScheme;
+import java.awt.image.BufferedImage;
 import net.runelite.client.ui.FontManager;
 import javax.swing.*;
 import java.awt.*;
@@ -16,8 +15,11 @@ public class ItemFindPanel extends PluginPanel {
     private final IconTextField searchField = new IconTextField();
     private final JButton searchButton = new JButton("Search");
     private final JTextArea resultArea = new JTextArea();
+    private final JLabel overallIcon = new JLabel();
+    
 
     public ItemFindPanel() {
+
         setLayout(new BorderLayout());
         setBackground(ColorScheme.DARK_GRAY_COLOR);
         setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
@@ -51,7 +53,13 @@ public class ItemFindPanel extends PluginPanel {
         return searchButton;
     }
 
+    void loadHeaderIcon(BufferedImage img)
+	{
+		overallIcon.setIcon(new ImageIcon(img));
+	}
+
     public void setResultText(String text) {
         resultArea.setText(text);
     }
 }
+
