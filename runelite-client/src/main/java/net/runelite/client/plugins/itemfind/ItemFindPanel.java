@@ -16,7 +16,7 @@ public class ItemFindPanel extends PluginPanel {
     private final JButton searchButton = new JButton("Search");
     private final JTextArea resultArea = new JTextArea();
     private final JLabel overallIcon = new JLabel();
-    
+    private itemObtainedSelection[] itemObtainedSelection;
 
     public ItemFindPanel() {
 
@@ -61,5 +61,13 @@ public class ItemFindPanel extends PluginPanel {
     public void setResultText(String text) {
         resultArea.setText(text);
     }
+
+    // public void refreshMainPanel() {
+    //     if (itemObtainedSelection != null && itemObtainedSelection.length > 0) {
+    //         SwingUtilities.invokeLater(() -> {
+    //             rebuildMainPanel();
+    //         });
+    //     }
+    // }
 }
 

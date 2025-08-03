@@ -64,7 +64,7 @@ public class WikiScraper {
                 // ---
                 
                 String tableHeaderTextLower = tableHeaderText.toLowerCase();
-                Boolean isItemObtainHeader = tableHeaderTextLower.toLowerCase().contains("item_sources") || tableHeaderTextLower.toLowerCase().contains("shop_locations") || tableHeaderTextLower.toLowerCase().contains("spawns");
+                Boolean isItemObtainHeader = tableHeaderTextLower.toLowerCase().contains("item_sources") || tableHeaderTextLower.toLowerCase().contains("shop_locations"); // || tableHeaderTextLower.toLowerCase().contains("spawns");
 
                 Elements parentH2 = tableHeader.parent().select("h2"); // Drops
                 Boolean isParentH2 = !parentH2.isEmpty();
@@ -72,7 +72,7 @@ public class WikiScraper {
                 Elements parentH3 = tableHeader.parent().select("h3"); // spawns and store locations
                 Boolean isParentH3 = !parentH3.isEmpty();
 
-                if (isParentH2 || isParentH3) {
+                if (isItemObtainHeader && (isParentH2 || isParentH3)) {
                     if (!currDropTable.isEmpty()) {
                         // reset section
                         curritemObtainedSelection.setTable(currDropTable);
@@ -96,7 +96,7 @@ public class WikiScraper {
                     // h2 is item-drops, h3 is store-locations-list || align-center-2
 
                     String selector = element == "h2" ? " ~ table.item-drops" : " ~ table.store-locations-list";
-                    int rowSize = element == "h2" ? 5 : 6; // 5 for item-drops, 4 for store-locations-list
+                    int rowSize = 6; // consolidating
                     Boolean isDrop = element.equals("h2");
                     WikiItem[] tableRows = getTableItems(tableIndex, element + selector, rowSize, isDrop);
 
@@ -123,7 +123,7 @@ public class WikiScraper {
                 tableHeaders = doc.select("h2 span.mw-headline");
 
                 if (!tableHeaders.isEmpty()) {
-                    WikiItem[] tableRows = getTableItems(0, "h2 ~ table.item-drops", 5, true);
+                    WikiItem[] tableRows = getTableItems(0, "h2 ~ table.item-drops", 6, true);
                     if (tableRows.length > 0) {
                         currDropTable = new LinkedHashMap<>();
                         currDropTable.put("Source", tableRows);
@@ -149,11 +149,24 @@ public class WikiScraper {
                 String[] lootRow = new String[rowSize];
                 Elements dropTableCells = dropTableRow.select("td");
                 int index = 1;
-
+                Boolean emptyLevel = false; // monsters with no level.
+                
                 for (Element dropTableCell : dropTableCells) {
+                    if (isDrop && index > 4)
+                    {
+                        // Skip the last two cells for drop tables
+                        continue;
+                    }
                     String cellContent = dropTableCell.text();
                     Elements images = dropTableCell.select("img");
-
+                    if(cellContent != null && 
+                    (cellContent.equals("Scavenger beast") ||
+                    cellContent.equals("Hell-Rat") ||
+                    cellContent.equals("Hell-Rat Behemoth"))
+                    )
+                    {
+                        emptyLevel = true;
+                    }
                     if (images.size() != 0) {
                         String imageSource = images.first().attr("src");
                         if (!imageSource.isEmpty()) {
@@ -165,6 +178,15 @@ public class WikiScraper {
                         cellContent = filterTableContent(cellContent);
                         lootRow[index] = cellContent;
                         index++;
+                    }
+                    else
+                    {
+                        if(emptyLevel) {
+                            cellContent = "0";
+                            cellContent = filterTableContent(cellContent);
+                            lootRow[index] = cellContent;
+                            index++;
+                        }
                     }
                 }
 
@@ -183,23 +205,22 @@ public class WikiScraper {
     public static WikiItem parseRow(String[] row, Boolean isDrop) {
         String src_spwn_sell = "";
         String level = "";
-
+        String imageUrl = "";
         double rarity = -1;
         String rarityStr = "";
 
         int quantity = 0;
         String quantityStr = "";
 
-        // First element is always a seller/spawn/npc
-        src_spwn_sell = row[0];
-        
+        // First element is always a seller/spawn/npc        
         if (isDrop) { // dropped from an NPC, use item_sources logic
-            level = row[1];
-
+            imageUrl = row[0];
+            src_spwn_sell = row[1];
             NumberFormat nf = NumberFormat.getNumberInstance();
 
+            level = row[2];
             // quantity logic
-            quantityStr = row[2];
+            quantityStr = row[3];
             quantityStr = quantityStr.replaceAll("–", "-").trim();
             try {
                 String[] quantityStrs = quantityStr.replaceAll("\\s+", "").split("-");
@@ -208,7 +229,7 @@ public class WikiScraper {
             } catch (ParseException e) {
             }
 
-            rarityStr = row[3];
+            rarityStr = row[4];
             if (rarityStr.startsWith("~")) {
                 rarityStr = rarityStr.substring(1);
             } else if (rarityStr.startsWith("2 × ") || rarityStr.startsWith("3 × ")) {
@@ -236,7 +257,7 @@ public class WikiScraper {
             }
 
         }
-        return new WikiItem(src_spwn_sell, level, quantity, quantityStr, rarityStr, rarity);
+        return new WikiItem(imageUrl, src_spwn_sell, level, quantity, quantityStr, rarityStr, rarity);
     }
 
 

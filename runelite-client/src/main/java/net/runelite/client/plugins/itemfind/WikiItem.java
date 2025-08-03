@@ -8,6 +8,7 @@ public class WikiItem {
 
     private String src_spwn_sell;
     private String level;
+    private String imageUrl;
     private int quantity;
     private String quantityStr;
     private String rarityStr;
@@ -15,7 +16,8 @@ public class WikiItem {
 
     NumberFormat nf = NumberFormat.getNumberInstance();
 
-    public WikiItem(String src_spwn_sell, String level, int quantity, String quantityStr, String rarityStr, double rarity) {
+    public WikiItem(String imageUrl, String src_spwn_sell, String level, int quantity, String quantityStr, String rarityStr, double rarity) {
+        this.imageUrl = imageUrl;
         this.src_spwn_sell = src_spwn_sell;
         this.level = level;
         this.quantity = quantity;
@@ -34,6 +36,10 @@ public class WikiItem {
 
     public String getQuantityStr() {
         return quantityStr;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
     }
 
     public double getRarity() {

@@ -39,9 +39,8 @@ public class ItemFindPlugin extends Plugin
     @Inject
     public OkHttpClient okHttpClient;
 
-    private itemObtainedSelection itemObtainedSelection;
+    private itemObtainedSelection[] itemObtainedSelection;
     private ItemFindPanel panel;
-    private ItemFindPluginService service;
     private NavigationButton navButton;
 
     @Provides
@@ -53,7 +52,6 @@ public class ItemFindPlugin extends Plugin
     @Override
     protected void startUp() throws Exception
     {
-        service = new ItemFindPluginService();
         panel = new ItemFindPanel();
 
         panel.getSearchButton().addActionListener(e -> {
@@ -90,12 +88,10 @@ public class ItemFindPlugin extends Plugin
 
         WikiScraper.getItemLocations(okHttpClient, itemName, itemId).whenCompleteAsync((itemObtainedSelection, ex) -> {
             this.itemObtainedSelection = itemObtainedSelection;
-            if (tablePanel != null) {
-                tablePanel.resetSelectedIndex();
-            }
-            monsterSearchField.setIcon(dropTableSections.length == 0 ? IconTextField.Icon.ERROR : IconTextField.Icon.SEARCH);
-            monsterSearchField.setEditable(true);
-            refreshMainPanel();
+            // if (tablePanel != null) {
+            //     tablePanel.resetSelectedIndex();
+            // }
+            // refreshMainPanel();
     });
     }
 }
