@@ -49,19 +49,6 @@ public class WikiScraper {
 
             for (Element tableHeader : tableHeaders) {
                 String tableHeaderText = tableHeader.text();
-                // String itemNameLC = itemName.toLowerCase();
-
-                // // --- Handle edge cases for specific pages ---
-                // if (itemNameLC.equals("hespori") && tableHeaderText.equals("Main table")) continue;
-                // if (itemNameLC.equals("chaos elemental") && tableHeaderText.equals("Major drops")) continue;
-                // if (itemNameLC.equals("cyclops") && tableHeaderText.equals("Drops")) continue;
-                // if (itemNameLC.equals("gorak") && tableHeaderText.equals("Drops")) continue;
-                // if (itemNameLC.equals("undead druid") && tableHeaderText.equals("Seeds")) {
-                //     incrementH3Index = true;
-                //     continue;
-                // }
-                // ;
-                // ---
                 
                 String tableHeaderTextLower = tableHeaderText.toLowerCase();
                 Boolean isItemObtainHeader = tableHeaderTextLower.toLowerCase().contains("item_sources") || tableHeaderTextLower.toLowerCase().contains("shop_locations"); // || tableHeaderTextLower.toLowerCase().contains("spawns");
@@ -202,6 +189,19 @@ public class WikiScraper {
         return wikiItems.toArray(result);
     }
 
+    private static String mapImageUrl(String originalUrl, String sourceName) {
+        // Check source name for specific cases
+        if (sourceName.toLowerCase().contains("multicombat")) {
+            return "/skill_icons/Attack.png";
+        } else if (sourceName.toLowerCase().contains("thieving") || 
+                   sourceName.toLowerCase().contains("pickpocket")) {
+            return "/skill_icons/Thieving.png";
+        } else if (originalUrl != null && originalUrl.contains("Casket.png")) {
+            return originalUrl; // Keep original Casket image
+        }
+        return originalUrl;
+    }
+
     public static WikiItem parseRow(String[] row, Boolean isDrop) {
         String src_spwn_sell = "";
         String level = "";
@@ -216,6 +216,8 @@ public class WikiScraper {
         if (isDrop) { // dropped from an NPC, use item_sources logic
             imageUrl = row[0];
             src_spwn_sell = row[1];
+            // Map the image URL based on source name
+            imageUrl = mapImageUrl(imageUrl, src_spwn_sell);
             NumberFormat nf = NumberFormat.getNumberInstance();
 
             level = row[2];
@@ -294,14 +296,11 @@ public class WikiScraper {
     }
 
     public static Boolean isItemHeaderForEdgeCases(String itemName, String tableHeaderText) {
-        String itemNameLC = itemName.toLowerCase();
-        String tableHeaderTextLower = tableHeaderText.toLowerCase();
-        return (false); // update
+        return false; // update
     }
 
     public static Boolean parseH3PrimaryForEdgeCases(String itemName) {
-        String itemNameLC = itemName.toLowerCase();
-        return itemNameLC.equals("cyclops");
+        return itemName.toLowerCase().equals("cyclops");
     }
 
     private static CompletableFuture<String> requestAsync(OkHttpClient okHttpClient, String url) {
@@ -321,8 +320,10 @@ public class WikiScraper {
                             @Override
                             public void onResponse(Call call, Response response) throws IOException {
                                 try (ResponseBody responseBody = response.body()) {
-                                    if (!response.isSuccessful()) future.complete("");
-
+                                    if (!response.isSuccessful() || responseBody == null) {
+                                        future.complete("");
+                                        return;
+                                    }
                                     future.complete(responseBody.string());
                                 } finally {
                                     response.close();

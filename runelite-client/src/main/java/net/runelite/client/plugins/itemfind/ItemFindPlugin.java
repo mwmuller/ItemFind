@@ -5,7 +5,6 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
-import net.runelite.client.ui.components.IconTextField;
 import net.runelite.client.util.ImageUtil;
 import okhttp3.OkHttpClient;
 
@@ -39,7 +38,6 @@ public class ItemFindPlugin extends Plugin
     @Inject
     public OkHttpClient okHttpClient;
 
-    private itemObtainedSelection[] itemObtainedSelection;
     private ItemFindPanel panel;
     private NavigationButton navButton;
 
@@ -87,12 +85,8 @@ public class ItemFindPlugin extends Plugin
         if (itemName.isEmpty()) return;
 
         WikiScraper.getItemLocations(okHttpClient, itemName, itemId).whenCompleteAsync((itemObtainedSelection, ex) -> {
-            this.itemObtainedSelection = itemObtainedSelection;
-            // if (tablePanel != null) {
-            //     tablePanel.resetSelectedIndex();
-            // }
-            // refreshMainPanel();
-    });
+            panel.updateResults(itemObtainedSelection);
+        });
     }
 }
 
