@@ -51,7 +51,7 @@ public class WikiScraper {
                 String tableHeaderText = tableHeader.text();
                 
                 String tableHeaderTextLower = tableHeaderText.toLowerCase();
-                Boolean isItemObtainHeader = tableHeaderTextLower.toLowerCase().contains("item_sources") || tableHeaderTextLower.toLowerCase().contains("shop_locations"); // || tableHeaderTextLower.toLowerCase().contains("spawns");
+                Boolean isItemObtainHeader = tableHeaderTextLower.toLowerCase().contains("item_sources") || tableHeaderTextLower.toLowerCase().contains("shop_locations")|| tableHeaderTextLower.toLowerCase().contains("item-drops"); // || tableHeaderTextLower.toLowerCase().contains("spawns");
 
                 Elements parentH2 = tableHeader.parent().select("h2"); // Drops
                 Boolean isParentH2 = !parentH2.isEmpty();
@@ -149,7 +149,20 @@ public class WikiScraper {
                     if(cellContent != null && 
                     (cellContent.equals("Scavenger beast") ||
                     cellContent.equals("Hell-Rat") ||
-                    cellContent.equals("Hell-Rat Behemoth"))
+                    cellContent.equals("Hell-Rat Behemoth") ||
+                    cellContent.equals("Boneguard") ||
+                    cellContent.equals("Lizardman shaman (Chambers of Xeric)") ||
+                    cellContent.equals("Skeletal Mystic") ||
+                    cellContent.equals("Deathly mage") ||
+                    cellContent.equals("Deathly ranger") ||
+                    cellContent.equals("Dungeon rat Regular") ||
+                    cellContent.equals("Mummy (Klenter's Pyramid) Level 84") ||
+                    cellContent.equals("Mummy (Pyramid Plunder) Level 84") ||
+                    cellContent.equals("Thing under the bed") ||
+                    cellContent.equals("Muttadile") ||
+                    cellContent.equals("Muttadile") ||
+                    cellContent.equals("Chest (Aldarin Villas)") ||
+                    cellContent.equals("Chest (Bryophyta's lair) Members")) // Edge case no combat level. Should update
                     )
                     {
                         emptyLevel = true;

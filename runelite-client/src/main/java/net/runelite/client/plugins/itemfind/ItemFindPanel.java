@@ -50,7 +50,7 @@ public class ItemFindPanel extends PluginPanel {
         JPanel filterPanel = new JPanel();
         filterPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         filterPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
-        filterPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.Y_AXIS));
 
         dropsCheckbox = new JCheckBox("Drops");
         spawnsCheckbox = new JCheckBox("Spawns");
@@ -61,8 +61,13 @@ public class ItemFindPanel extends PluginPanel {
             checkbox.setBackground(ColorScheme.DARKER_GRAY_COLOR);
             checkbox.setForeground(Color.WHITE);
             checkbox.setFocusPainted(false);
+            checkbox.setFont(new Font(Font.DIALOG, Font.PLAIN, 11));
+            checkbox.setAlignmentX(Component.LEFT_ALIGNMENT);
+            checkbox.setBorder(BorderFactory.createEmptyBorder(2, 0, 2, 0));
             filterPanel.add(checkbox);
+            filterPanel.add(Box.createRigidArea(new Dimension(0, 4))); // Add spacing between checkboxes
         }
+        filterPanel.remove(filterPanel.getComponent(filterPanel.getComponentCount() - 1)); // Remove the last spacer
 
         // Add both panels to the north
         JPanel northPanel = new JPanel(new BorderLayout());
@@ -79,7 +84,7 @@ public class ItemFindPanel extends PluginPanel {
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(12, 0));
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(7,7,7,7));
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(4,4,4,4));
         
         add(scrollPane, BorderLayout.CENTER);
 

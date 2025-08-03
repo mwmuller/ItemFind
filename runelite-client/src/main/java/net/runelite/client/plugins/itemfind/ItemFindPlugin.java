@@ -43,12 +43,6 @@ public class ItemFindPlugin extends Plugin
     private NavigationButton navButton;
     private String currentItemName;
 
-    @Provides
-    ItemFindConfig provideConfig(ConfigManager configManager)
-    {
-        return configManager.getConfig(ItemFindConfig.class);
-    }
-
     @Override
     protected void startUp() throws Exception
     {
