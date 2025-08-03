@@ -7,6 +7,7 @@ import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.util.ImageUtil;
 import okhttp3.OkHttpClient;
+import java.util.Collections;
 
 import java.awt.image.BufferedImage;
 import javax.inject.Inject;
@@ -40,6 +41,7 @@ public class ItemFindPlugin extends Plugin
 
     private ItemFindPanel panel;
     private NavigationButton navButton;
+    private String currentItemName;
 
     @Provides
     ItemFindConfig provideConfig(ConfigManager configManager)
@@ -54,7 +56,16 @@ public class ItemFindPlugin extends Plugin
 
         panel.getSearchButton().addActionListener(e -> {
             String itemName = panel.getSearchText();
-            int itemId = itemManager.search(itemName).get(0).getId();
+            var searchResults = itemManager.search(itemName);
+            if (searchResults.isEmpty()) {
+                // Show simple error message
+                itemObtainedSelection[] error = new itemObtainedSelection[1];
+                error[0] = new itemObtainedSelection("Item not found",
+                    Collections.emptyMap());
+                panel.updateResults(error);
+                return;
+            }
+            int itemId = searchResults.get(0).getId();
             searchForItemName(itemName, itemId);
         });
         
@@ -83,8 +94,38 @@ public class ItemFindPlugin extends Plugin
     
     void searchForItemName(String itemName, int itemId) {
         if (itemName.isEmpty()) return;
-
+        
+        // Don't search if it's the same item
+        if (itemName.equals(currentItemName)) return;
+        
+        currentItemName = itemName;
         WikiScraper.getItemLocations(okHttpClient, itemName, itemId).whenCompleteAsync((itemObtainedSelection, ex) -> {
+            if (ex != null) {
+                // Create a single selection to show the error
+                itemObtainedSelection[] error = new itemObtainedSelection[1];
+                error[0] = new itemObtainedSelection("Error", 
+                    Collections.singletonMap("❗ Item Not Found", new WikiItem[]{
+                        new WikiItem("/skill_icons/Construction.png", 
+                            "Item '" + itemName + "' could not be found on the Wiki", 
+                            "", 0, "", "", 0.0)
+                    }));
+                panel.updateResults(error);
+                return;
+            }
+            
+            if (itemObtainedSelection == null || itemObtainedSelection.length == 0) {
+                // Create a single selection to show no results
+                itemObtainedSelection[] noResults = new itemObtainedSelection[1];
+                noResults[0] = new itemObtainedSelection("No Results", 
+                    Collections.singletonMap("❗ No Sources Found", new WikiItem[]{
+                        new WikiItem("/skill_icons/Construction.png", 
+                            "No sources found for '" + itemName + "'", 
+                            "", 0, "", "", 0.0)
+                    }));
+                panel.updateResults(noResults);
+                return;
+            }
+            
             panel.updateResults(itemObtainedSelection);
         });
     }

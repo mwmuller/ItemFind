@@ -14,9 +14,10 @@ public class ItemSourcePanel extends JPanel {
     private static final Dimension IMAGE_SIZE = new Dimension(32, 32);
     private static final Color BACKGROUND_COLOR = ColorScheme.DARKER_GRAY_COLOR;
     private static final Color HEADER_COLOR = ColorScheme.BRAND_ORANGE;
-    private static final int PADDING = 4;
+    private static final int PADDING = 3;
     private static final int INNER_PADDING = 2;
-    private static final int PANEL_WIDTH = 300;
+    private static final int PANEL_WIDTH = 270;
+    private static final int ITEM_HEIGHT = 45;
 
     public ItemSourcePanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -41,10 +42,11 @@ public class ItemSourcePanel extends JPanel {
                 // Add table header
                 add(createSubHeader(table.getKey()));
                 
-                // Create grid panel for items
-                JPanel gridPanel = new JPanel(new GridLayout(0, 1, PADDING, PADDING));
+                        // Create grid panel for items with fixed height rows
+                JPanel gridPanel = new JPanel();
+                gridPanel.setLayout(new BoxLayout(gridPanel, BoxLayout.Y_AXIS));
                 gridPanel.setBackground(BACKGROUND_COLOR);
-                gridPanel.setBorder(new EmptyBorder(INNER_PADDING, PADDING, INNER_PADDING, PADDING));
+                gridPanel.setBorder(new EmptyBorder(0, INNER_PADDING, INNER_PADDING, INNER_PADDING));
 
                 for (WikiItem item : table.getValue()) {
                     gridPanel.add(createItemPanel(item, table.getKey()));
@@ -63,7 +65,8 @@ public class ItemSourcePanel extends JPanel {
         JLabel header = new JLabel(text);
         header.setFont(FontManager.getRunescapeBoldFont());
         header.setForeground(HEADER_COLOR);
-        header.setBorder(new EmptyBorder(PADDING, PADDING, INNER_PADDING, PADDING));
+        header.setBorder(new EmptyBorder(PADDING, INNER_PADDING, 0, INNER_PADDING));
+        header.setAlignmentX(Component.LEFT_ALIGNMENT);
         return header;
     }
 
@@ -71,7 +74,8 @@ public class ItemSourcePanel extends JPanel {
         JLabel subHeader = new JLabel(text);
         subHeader.setFont(FontManager.getRunescapeSmallFont());
         subHeader.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-        subHeader.setBorder(new EmptyBorder(INNER_PADDING, PADDING * 2, INNER_PADDING, PADDING));
+        subHeader.setBorder(new EmptyBorder(INNER_PADDING, PADDING, 0, INNER_PADDING));
+        subHeader.setAlignmentX(Component.LEFT_ALIGNMENT);
         return subHeader;
     }
 
@@ -79,17 +83,20 @@ public class ItemSourcePanel extends JPanel {
         JLabel label = new JLabel(text);
         label.setForeground(color);
         label.setFont(FontManager.getRunescapeSmallFont());
+        label.setHorizontalAlignment(SwingConstants.LEFT);
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
+        label.setBorder(new EmptyBorder(PADDING, INNER_PADDING, 0, INNER_PADDING));
         return label;
     }
 
     private JPanel createItemPanel(WikiItem item, String tableType) {
         JPanel panel = new JPanel();
         panel.setBackground(ColorScheme.DARKER_GRAY_COLOR.darker());
-        panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(ColorScheme.DARKER_GRAY_COLOR.brighter(), 1),
-            new EmptyBorder(INNER_PADDING, INNER_PADDING, INNER_PADDING, INNER_PADDING)
-        ));
+        panel.setBorder(BorderFactory.createLineBorder(ColorScheme.DARKER_GRAY_COLOR.brighter(), 1));
         panel.setLayout(new BorderLayout(INNER_PADDING, 0));
+        panel.setPreferredSize(new Dimension(PANEL_WIDTH - (PADDING * 2), ITEM_HEIGHT));
+        panel.setMinimumSize(new Dimension(PANEL_WIDTH - (PADDING * 2), ITEM_HEIGHT));
+        panel.setMaximumSize(new Dimension(PANEL_WIDTH - (PADDING * 2), ITEM_HEIGHT));
         panel.setPreferredSize(new Dimension(PANEL_WIDTH - (PADDING * 2), panel.getPreferredSize().height));
 
         // Left side - Image
@@ -105,21 +112,22 @@ public class ItemSourcePanel extends JPanel {
         }
 
         // Center - Information
-        JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        JPanel infoPanel = new JPanel(new BorderLayout());
         infoPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR.darker());
 
         // Location/Source with left alignment
         JLabel sourceLabel = createLabel(item.src_spwn_sell(), ColorScheme.LIGHT_GRAY_COLOR);
-        sourceLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        infoPanel.add(sourceLabel);
+        JPanel sourcePanel = new JPanel(new BorderLayout());
+        sourcePanel.setBackground(ColorScheme.DARKER_GRAY_COLOR.darker());
+        sourcePanel.setBorder(new EmptyBorder(0, INNER_PADDING, 0, 0));
+        sourcePanel.add(sourceLabel, BorderLayout.WEST);
+        infoPanel.add(sourcePanel, BorderLayout.NORTH);
 
         // Additional info based on type
         if (!tableType.toLowerCase().contains("shop") && !tableType.toLowerCase().contains("spawn")) {
             // Create a panel for level and amount on the same line
             JPanel statsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, INNER_PADDING, 0));
             statsPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR.darker());
-            statsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             
             if (!item.getLevel().isEmpty()) {
                 String levelText = "L:" + item.getLevel();
@@ -128,10 +136,19 @@ public class ItemSourcePanel extends JPanel {
             }
             statsPanel.add(createLabel("Qty:" + item.getQuantityLabelText(), Color.WHITE));
             
-            infoPanel.add(statsPanel);
+            JPanel bottomPanel = new JPanel(new BorderLayout());
+            bottomPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR.darker());
+            bottomPanel.setBorder(new EmptyBorder(INNER_PADDING, INNER_PADDING, 0, 0));
+            bottomPanel.add(statsPanel, BorderLayout.NORTH);
+            
             JLabel rarityLabel = createLabel("Rarity: " + item.getRarityStr(), HEADER_COLOR);
-            rarityLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            infoPanel.add(rarityLabel);
+            JPanel rarityPanel = new JPanel(new BorderLayout());
+            rarityPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR.darker());
+            rarityPanel.setBorder(new EmptyBorder(INNER_PADDING, INNER_PADDING, 0, 0));
+            rarityPanel.add(rarityLabel, BorderLayout.WEST);
+            
+            bottomPanel.add(rarityPanel, BorderLayout.CENTER);
+            infoPanel.add(bottomPanel, BorderLayout.CENTER);
         } else if (tableType.toLowerCase().contains("spawn")) {
             infoPanel.add(createLabel("Amount: " + item.getQuantityLabelText(), Color.WHITE));
         } else {

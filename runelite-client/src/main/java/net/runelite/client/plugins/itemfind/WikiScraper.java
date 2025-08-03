@@ -34,8 +34,8 @@ public class WikiScraper {
             List<itemObtainedSelection> itemObtainedSelections = new ArrayList<>();
 
             if (ex != null) {
-                itemObtainedSelection[] result = new itemObtainedSelection[0];
-                future.complete(result);
+                future.completeExceptionally(ex);
+                return;
             }
 
             doc = Jsoup.parse(responseHTML);
